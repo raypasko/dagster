@@ -22,10 +22,6 @@ from .util import airflow_storage_exception, construct_variables, parse_raw_res
 
 DOCKER_TEMPDIR = '/tmp'
 
-DEFAULT_ENVIRONMENT = {
-    'AWS_ACCESS_KEY_ID': os.getenv('AWS_ACCESS_KEY_ID'),
-    'AWS_SECRET_ACCESS_KEY': os.getenv('AWS_SECRET_ACCESS_KEY'),
-}
 
 LINE_LENGTH = 100
 
@@ -129,7 +125,85 @@ class ModifiedDockerOperator(DockerOperator):
         return super(ModifiedDockerOperator, self)._DockerOperator__get_tls_config()
 
 
-class DagsterDockerOperator(ModifiedDockerOperator):
+class GenericExecMixin:
+    """
+    Base class for shared machinery for operators that will exec: Docker, Kubernetes, venvs, etc.
+    """
+
+    # py2 compat
+    # pylint: disable=keyword-arg-before-vararg
+    def __init__(self, propagate_aws_vars=True, *args, **kwargs):
+        self.propagate_aws_vars = propagate_aws_vars
+        super(GenericExecMixin, self).__init__(*args, **kwargs)
+
+    @property
+    def run_id(self):
+        return getattr(self, "_run_id", '')
+
+    @property
+    def query(self):
+        # TODO: https://github.com/dagster-io/dagster/issues/1342
+        redacted = construct_variables(
+            self.mode, 'REDACTED', self.pipeline_name, self.run_id, self.airflow_ts, self.step_keys
+        )
+        self.log.info(
+            'Executing GraphQL query: {query}\n'.format(query=START_PIPELINE_EXECUTION_QUERY)
+            + 'with variables:\n'
+            + seven.json.dumps(redacted, indent=2)
+        )
+
+        variables = construct_variables(
+            self.mode,
+            self.environment_dict,
+            self.pipeline_name,
+            self.run_id,
+            self.airflow_ts,
+            self.step_keys,
+        )
+
+        return [
+            '-v',
+            '{}'.format(seven.json.dumps(variables)),
+            '{}'.format(START_PIPELINE_EXECUTION_QUERY),
+        ]
+
+    @property
+    def default_environment(self):
+        """
+        Return a default set of environment variables for Docker and Kubernetes execution.
+        """
+        default_env = {}
+
+        if self.propagate_aws_vars:
+            # If these env vars are set in Kubernetes, anyone with access to pods in that namespace
+            # can retreive them. This may not be appropriate for all environments, so provide a
+            # toggle if users want to provide credentials more securely.
+
+            # Also, if these env vars are set as blank vars, the behavior depends on boto version:
+            # https://github.com/boto/botocore/pull/1687
+            # It's safer to check-and-set since if interpreted as blank strings they'll break the
+            # cred retrieval chain (such as on-disk or metadata-API creds).
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+            # The creds _also_ break if you only set one of them.
+            if aws_access_key_id and aws_secret_access_key:
+                # TODO: also get region env var this way, since boto commands may fail without it
+                default_env.update(
+                    {
+                        'AWS_ACCESS_KEY_ID': aws_access_key_id,
+                        'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
+                    }
+                )
+            elif aws_access_key_id or aws_secret_access_key:
+                raise ValueError(
+                    "If `propagate_aws_vars=True`, must provide either both of AWS_ACCESS_KEY_ID"
+                    " and AWS_SECRET_ACCESS_KEY env vars, or neither."
+                )
+        return default_env
+
+
+class DagsterDockerOperator(GenericExecMixin, ModifiedDockerOperator):
     '''Dagster operator for Apache Airflow.
 
     Wraps a modified DockerOperator incorporating https://github.com/apache/airflow/pull/4315.
@@ -193,44 +267,13 @@ class DagsterDockerOperator(ModifiedDockerOperator):
         # Store Airflow DAG run timestamp so that we can pass along via execution metadata
         self.airflow_ts = kwargs.get('ts')
 
-        if 'environment' not in kwargs:
-            kwargs['environment'] = DEFAULT_ENVIRONMENT
-
         super(DagsterDockerOperator, self).__init__(
             task_id=task_id, dag=dag, tmp_dir=tmp_dir, host_tmp_dir=host_tmp_dir, *args, **kwargs
         )
 
-    @property
-    def run_id(self):
-        if self._run_id is None:
-            return ''
-        else:
-            return self._run_id
-
-    @property
-    def query(self):
-        # TODO: https://github.com/dagster-io/dagster/issues/1342
-        redacted = construct_variables(
-            self.mode, 'REDACTED', self.pipeline_name, self.run_id, self.airflow_ts, self.step_keys
-        )
-        self.log.info(
-            'Executing GraphQL query: {query}\n'.format(query=START_PIPELINE_EXECUTION_QUERY)
-            + 'with variables:\n'
-            + seven.json.dumps(redacted, indent=2)
-        )
-
-        variables = construct_variables(
-            self.mode,
-            self.environment_dict,
-            self.pipeline_name,
-            self.run_id,
-            self.airflow_ts,
-            self.step_keys,
-        )
-
-        return '-v \'{variables}\' \'{query}\''.format(
-            variables=seven.json.dumps(variables), query=START_PIPELINE_EXECUTION_QUERY
-        )
+        # Update environment with applicable defaults
+        for k, v in self.default_environment.items():
+            self.environment.setdefault(k, v)
 
     def get_command(self):
         if self.command is not None and self.command.strip().find('[') == 0:
@@ -238,7 +281,8 @@ class DagsterDockerOperator(ModifiedDockerOperator):
         elif self.command is not None:
             commands = self.command
         else:
-            commands = self.query
+            # return a string-joined version of the query text
+            commands = " ".join(self.query)
         return commands
 
     def get_hook(self):
@@ -260,7 +304,7 @@ class DagsterDockerOperator(ModifiedDockerOperator):
 
         except ImportError:
             raise AirflowException(
-                'To use the DagsterPythonOperator, dagster and dagster_graphql must be installed '
+                'To use the DagsterDockerOperator, dagster and dagster_graphql must be installed '
                 'in your Airflow environment.'
             )
         if 'run_id' in self.params:

@@ -1,4 +1,4 @@
-Reusing Solids
+Reusable solids
 ---------------
 
 So far we have been using solids tailor-made for each pipeline they were resident in, and have
@@ -28,7 +28,7 @@ of an *invocation* and a *definition* are actually different. The invocation is 
 via a dependency graph to other invocations. The definition is the generic, resuable piece of logic
 that is invoked many times within this pipeline.
 
-.. image:: reusing_solids_figure_one.png
+.. thumbnail:: reusing_solids_figure_one.png
 
 You'll also notice in the right-hand column
 

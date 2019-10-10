@@ -4,7 +4,7 @@ from dagster import execute_pipeline, pipeline, solid
 
 
 @solid
-def read_csv(context, csv_path):
+def read_csv(context, csv_path: str):
     with open(csv_path, 'r') as fd:
         lines = [row for row in csv.DictReader(fd)]
     

@@ -1,7 +1,7 @@
 .. _execution_context:
 
-Execution Context
-=================
+Logging
+-------
 The execution context is threaded throughout the entire execution of a pipeline via a ``context``
 object passed to user code. It wraps the logging system along with external resources, such as object store sessions;
 database and data warehouse connections; and access points for computational runtimes (e.g. a Spark context).

@@ -1,5 +1,5 @@
 Resources
-=========
+---------
 
 We've already learned about logging through the context object. We can also use the context object
 to manage pipelines' access to resources like the file system, databases, or cloud services. In
@@ -26,7 +26,7 @@ resources.py``, you should see a message from ``dagsterbot`` appear in your Slac
 
 
 Modes
-=====
+-----
 Resources are attached to a set of :py:class:`ModeDefinition <dagster.ModeDefinition>` defined on
 the pipeline. A :py:class:`ModeDefinition <dagster.ModeDefinition>` is the way that a pipeline can
 declare the different "modes" it can operate in. For example, you may have "unittest", "local", or

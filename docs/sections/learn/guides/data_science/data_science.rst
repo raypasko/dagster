@@ -63,7 +63,7 @@ the notebook itself to run it using the dagster tooling. Just run:
 What's more, every time we run the notebook from Dagit, a copy of the notebook `as executed` will
 be written to disk and the path of this output notebook will be made available in Dagit:
 
-.. image:: iris_output_notebook.png
+.. thumbnail:: iris_output_notebook.png
    :scale: 50 %
 
 The output notebook is both a rich log of notebook computations as they actually occurred, including
@@ -120,14 +120,14 @@ into which it should inject parameters at runtime. You will need to be running J
 and may need to turn the display of cell tags on (select *View > Cell Toolbar > Tags* from the
 Jupyter menu).
 
-.. image:: tags.png
+.. thumbnail:: tags.png
    :scale: 35 %
 
 Tag the cell you want Dagstermill to replace at runtime with the tag ``parameters``.
 
 In the `source notebook <iris-kmeans_2.ipynb>`_., this cell will look like this:
 
-.. image:: parameters.png
+.. thumbnail:: parameters.png
 
 In the source notebook, we can give our parameters values that are useful for interactive
 development (say, with a test dataset).
@@ -135,7 +135,7 @@ development (say, with a test dataset).
 Now we are ready to execute a pipeline that flows the output of arbitrary Python code into a
 notebook:
 
-.. image:: iris_pipeline.png
+.. thumbnail:: iris_pipeline.png
    :scale: 40 %
 
 We'll use the following config:

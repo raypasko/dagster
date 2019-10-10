@@ -4,17 +4,15 @@ Tutorial
 .. toctree::
   :maxdepth: 1
 
-  hello_world
+  hello_cereal
   hello_dag
-  actual_dag
   inputs
   config
-  configuration_schemas
-  execution_context
+  types
   resources
+  execution_context
   repos
   pipeline_cli_execution
-  types
   expectations
   multiple_outputs
   reusing_solids

@@ -1,4 +1,4 @@
-Composing Solids
+Composing solids
 ----------------
 
 To help manage the level of complexity that data applications tend to reach,
@@ -23,7 +23,7 @@ For examples, lets take this pipeline that performs the same work over two diffe
    :lines: 83-93
    :caption: composition.py
 
-.. image:: complex_pipeline.png
+.. thumbnail:: complex_pipeline.png
 
 While this is a contrived example, it's clear how given the ability to refactor we could
 remove the redundancy.
@@ -48,9 +48,9 @@ soild and then return the output of the ``load`` solid allowing us to pass it to
 
 This gives us a slightly cleaner pipeline:
 
-.. image:: composed_pipeline.png
+.. thumbnail:: composed_pipeline.png
 
 We can open the composite instances in dagit to see the inner solids, as well as how inputs and outputs
 are mapped.
 
-.. image:: composite_solid.png
+.. thumbnail:: composite_solid.png

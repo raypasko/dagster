@@ -38,7 +38,7 @@ If you save this file as ``repos.py``, you can then run the command line tools o
 Now you can see the list of all pipelines in the repo via the dropdown at the top—in this case, just
 the ``repo_demo_pipeline`` pipeline.
 
-.. image:: https://user-images.githubusercontent.com/609349/59065045-a8b23500-8860-11e9-8486-f29aab86a1d9.png
+.. thumbnail:: https://user-images.githubusercontent.com/609349/59065045-a8b23500-8860-11e9-8486-f29aab86a1d9.png
 
 Typing the name of the file and function defining the repository gets tiresome and repetitive, so
 let's create a declarative config file with this information to make using the command line tools

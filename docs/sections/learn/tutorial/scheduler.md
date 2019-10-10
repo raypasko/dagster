@@ -1,4 +1,4 @@
-# Scheduler
+# Scheduling execution
 
 After defining our pipelines, we can use dagster’s scheduler abstraction to schedule runs. We can also use dagit to control and monitor schedules.
 

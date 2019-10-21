@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+dagster-examples = {editable = true,path = "."}
+dagster = "*"
+dagit = "*"
+pandas = "*"
+dagster-pandas = "*"
+dagster-aws = "*"
+pyspark = "*"
+sqlalchemy = "*"
+dagster-pyspark = "*"
+dagster-sqlalchemy = "*"
+dagster-snowflake = "*"
+pytest = "*"
+
+[requires]
+python_version = "3.6"

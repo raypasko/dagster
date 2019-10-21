@@ -27,7 +27,7 @@ def configurable_class_data_or_default(config_value, field_name, default):
         return ConfigPluginData(
             config_value[field_name]['module'],
             config_value[field_name]['plugin'],
-            yaml.dump(config_value[field_name]['config'], default_flow_style=False),
+            config_value[field_name]['config'],
         )
     return default
 
@@ -75,17 +75,16 @@ class InstanceRef(
             ConfigPluginData(
                 'dagster.core.storage.root',
                 'local_artifact_storage_config_plugin',
-                yaml.dump({'base_dir': base_dir}, default_flow_style=False),
+                {'base_dir': base_dir},
             ),
         )
-
         run_storage_data = configurable_class_data_or_default(
             config_value,
             'run_storage',
             ConfigPluginData(
                 'dagster.core.storage.sqlite_run_storage',
                 'sqlite_run_storage_config_plugin',
-                yaml.dump({'base_dir': _runs_directory(base_dir)}, default_flow_style=False),
+                {'base_dir': _runs_directory(base_dir)},
             ),
         )
 
@@ -95,7 +94,7 @@ class InstanceRef(
             ConfigPluginData(
                 'dagster.core.storage.event_log',
                 'sqlite_event_log_storage_config_plugin',
-                yaml.dump({'base_dir': _event_logs_directory(base_dir)}, default_flow_style=False),
+                {'base_dir': _event_logs_directory(base_dir)},
             ),
         )
 
@@ -105,9 +104,7 @@ class InstanceRef(
             ConfigPluginData(
                 'dagster.core.storage.local_compute_log_manager',
                 'local_compute_log_manager_config_plugin',
-                yaml.dump(
-                    {'base_dir': _compute_logs_directory(base_dir)}, default_flow_style=False
-                ),
+                {'base_dir': _compute_logs_directory(base_dir)},
             ),
         )
 

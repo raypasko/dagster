@@ -175,7 +175,10 @@ class DagsterInstance:
                 '{p}plugin: {cls}\n'
                 '{p}config:\n'
                 '{p}  {config}'.format(
-                    p='    ', module=ccd.module_name, cls=ccd.plugin_name, config=ccd.config_yaml
+                    p='    ',
+                    module=ccd.module_name,
+                    cls=ccd.plugin_name,
+                    config=yaml.dump(ccd.config_dict, default_flow_style=False),
                 )
             )
 

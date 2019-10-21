@@ -11,17 +11,17 @@ from .field import resolve_to_config_type
 
 
 @whitelist_for_serdes
-class ConfigPluginData(namedtuple('_ConfigPluginData', 'module_name plugin_name config_yaml')):
+class ConfigPluginData(namedtuple('_ConfigPluginData', 'module_name plugin_name config_dict')):
     '''Serializable tuple describing where to find a plugin and the config fragment that should
     be used to instantiate it.
     '''
 
-    def __new__(cls, module_name, plugin_name, config_yaml):
+    def __new__(cls, module_name, plugin_name, config_dict):
         return super(ConfigPluginData, cls).__new__(
             cls,
             check.str_param(module_name, 'module_name'),
             check.str_param(plugin_name, 'plugin_name'),
-            check.str_param(config_yaml, 'config_yaml'),
+            check.dict_param(config_dict, 'config_dict'),
         )
 
 
@@ -52,7 +52,7 @@ def construct_from_config_plugin_data(plugin_data):
         )
 
     if isinstance(plugin, ConfigPlugin):
-        config_dict = yaml.load(plugin_data.config_yaml)
+        config_dict = plugin_data.config_dict
         result = evaluate_config(plugin.config_type, config_dict)
         if not result.success:
             raise DagsterInvalidConfigError(None, result.errors, config_dict)
